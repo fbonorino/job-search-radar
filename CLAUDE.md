@@ -26,10 +26,34 @@ sus datos. Antes de usarlo:
    salarial, disponibilidad, modalidad aceptada, años por tecnología. **No inventar
    ningún valor** — si falta un dato, preguntar antes de completarlo en un formulario.
 3. Poner el CV actualizado en esta carpeta.
-4. Si vas a usar Playwright MCP para asistir con las postulaciones, la primera vez
-   hay que loguearse a mano en cada portal para que la sesión quede guardada. **No
-   commitear nunca el perfil de navegador ni logs de sesión al repo** — van al
+4. Playwright MCP ya está configurado (`.mcp.json`, perfil persistente en
+   `radar-empleos/navegador-perfil/`). La primera vez hay que loguearse a mano en
+   cada portal (LinkedIn, Computrabajo, etc.) para que la sesión quede guardada.
+   **No commitear nunca el perfil de navegador ni logs de sesión al repo** — van al
    `.gitignore`.
+
+## Postulación asistida: cuándo se envía sola y cuándo no
+
+El objetivo es completar y enviar solas las postulaciones "simples", y dejar las
+"complejas" para que Franco las revise. Nunca se envía nada sin pasar por esta
+clasificación primero.
+
+- **Simple → se completa y se envía sola:** todos los campos requeridos tienen un
+  valor exacto y sin ambigüedad en `datos-postulacion.json` (datos personales, CV
+  adjunto, preguntas cerradas tipo sí/no o de opción con una respuesta clara). Sin
+  preguntas de texto libre no triviales.
+- **Compleja → queda en estado `PENDIENTE VALIDAR` en `cola-postulacion.md`, NO se
+  envía:** cualquier pregunta de ensayo/texto libre no trivial ("¿por qué te
+  interesa este puesto?"), cualquier campo requerido que no está en
+  `datos-postulacion.json` (no inventar, regla 2), o cualquier definición de
+  pretensión salarial donde el rango no deja claro qué numero exacto poner.
+- **Excepción que no se salta nunca:** la primera postulación de cada portal nuevo
+  (LinkedIn, Workday, Computrabajo, etc.) se muestra completa antes de enviarla,
+  aunque sea "simple", para validar que el mapeo de campos es correcto ahí. Una vez
+  validado ese patrón para un portal, las simples siguientes de ese mismo portal
+  se envían solas.
+- Antes de enviar cualquier postulación, revisar que la URL no esté ya `ENVIADA`
+  en `cola-postulacion.md` (regla 6 de la seccion anterior).
 
 ## Reglas generales al completar formularios (ajustar a gusto)
 

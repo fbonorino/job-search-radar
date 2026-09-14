@@ -456,7 +456,7 @@ function Read-ColaEstados([string]$Path) {
     if (-not (Test-Path $Path)) { return $estados }
     $txt = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
     foreach ($line in ($txt -split "`n")) {
-        $m = [regex]::Match($line, '^\|\s*\d+\s*\|\s*\[.*?\]\((.*?)\)\s*\|.*?\|.*?\|\s*(PENDIENTE|ENVIADA|DESCARTADA)\s*\|')
+        $m = [regex]::Match($line, '^\|\s*\d+\s*\|\s*\[.*?\]\((.*?)\)\s*\|.*?\|.*?\|\s*(PENDIENTE VALIDAR|PENDIENTE|ENVIADA|DESCARTADA)\s*\|')
         if ($m.Success) { $estados[$m.Groups[1].Value] = $m.Groups[2].Value }
     }
     return $estados
@@ -468,7 +468,8 @@ function Write-Cola($Ofertas, [string]$Path) {
     [void]$sb.AppendLine('')
     [void]$sb.AppendLine('Generado por `Buscar-Empleos.ps1`. Ofertas por encima del `puntajeMinimo` de `perfil.json`.')
     [void]$sb.AppendLine('Actualizá el `Estado` a mano (o pedile a Claude que lo actualice) a medida que postulás:')
-    [void]$sb.AppendLine('`PENDIENTE` -> `ENVIADA` o `DESCARTADA`. La proxima corrida respeta lo que ya marcaste.')
+    [void]$sb.AppendLine('`PENDIENTE` -> `ENVIADA`, `DESCARTADA` o `PENDIENTE VALIDAR` (formulario complejo, requiere tu revision).')
+    [void]$sb.AppendLine('La proxima corrida respeta cualquiera de esos estados que ya hayas marcado.')
     [void]$sb.AppendLine('')
     [void]$sb.AppendLine('| Puntaje | Título | Empresa | Fuente | Estado |')
     [void]$sb.AppendLine('|---|---|---|---|---|')
@@ -516,6 +517,7 @@ h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
 .chip.descartada{border-color:var(--mut);color:var(--mut);text-decoration:line-through}
 .chip.pendiente{border-color:var(--line);color:var(--mut)}
 .chip.revisar{background:var(--warn);border-color:var(--warn);color:#fff;font-weight:600}
+.chip.pendientevalidar{border-color:var(--acc);color:var(--acc);font-weight:600}
 .why{color:var(--mut);font-size:12px;margin-top:8px}
 footer{color:var(--mut);font-size:12px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
 @media(max-width:640px){.job{grid-template-columns:44px 1fr;gap:12px}.sc{width:44px;height:44px;font-size:14px}}
@@ -570,7 +572,7 @@ document.querySelectorAll('.bar button').forEach(function(b){
         $estado = 'PENDIENTE'
         if ($o.PSObject.Properties.Name -contains 'Estado' -and $o.Estado) { $estado = $o.Estado }
         $estadoCls = 'pendiente'
-        if ($estado -eq 'ENVIADA') { $estadoCls = 'enviada' } elseif ($estado -eq 'DESCARTADA') { $estadoCls = 'descartada' } elseif ($estado -eq 'REVISAR') { $estadoCls = 'revisar' }
+        if ($estado -eq 'ENVIADA') { $estadoCls = 'enviada' } elseif ($estado -eq 'DESCARTADA') { $estadoCls = 'descartada' } elseif ($estado -eq 'REVISAR') { $estadoCls = 'revisar' } elseif ($estado -eq 'PENDIENTE VALIDAR') { $estadoCls = 'pendientevalidar' }
         [void]$sb.Append('<p class="t"><a href="' + [System.Net.WebUtility]::HtmlEncode($o.Url) + '" target="_blank" rel="noopener">' +
                          [System.Net.WebUtility]::HtmlEncode($o.Titulo) + '</a> <span class="chip ' + $estadoCls + '">' +
                          $estado + '</span></p>')
