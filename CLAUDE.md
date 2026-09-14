@@ -43,6 +43,12 @@ sus datos. Antes de usarlo:
 4. **Actualizar `cola-postulacion.md`** con `ENVIADA` o `DESCARTADA` a medida que se avanza.
 5. **Leer la descripción completa antes de postular, no solo el título.** El puntaje
    del radar mira sobre todo el título; el cuerpo puede contradecirlo.
+6. **Nunca postular dos veces a la misma oferta.** Antes de enviar cualquier
+   postulación (asistida o no), revisar el estado de esa URL en `cola-postulacion.md`.
+   Si ya dice `ENVIADA`, no reenviar bajo ninguna circunstancia — avisar y preguntar
+   en vez de asumir que hay que volver a mandarla. `PENDIENTE` no significa que se
+   envió nada: es solo el estado inicial de las ofertas que superan el umbral de
+   auto-envío (`puntajeAutoEnvio` en `perfil.json`), esperando que se postule.
 
 ## Trampas conocidas de los formularios (genéricas)
 
