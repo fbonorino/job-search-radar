@@ -1,0 +1,15 @@
+# Datos personales / generados en cada corrida — nunca al repo
+CV_*.pdf
+radar-empleos/reportes/*.html
+radar-empleos/reportes/*.csv
+radar-empleos/datos/vistos.json
+radar-empleos/navegador-perfil/
+radar-empleos/cola-postulacion.md
+
+# Sesiones y capturas de Playwright MCP
+.playwright-mcp/
+
+# Config local de Claude Code
+.claude/settings.local.json
+
+.DS_Store

@@ -1,0 +1,58 @@
+{
+  "_comentario": "Plantilla vacia. Datos fijos para completar formularios de postulacion, se responden una vez y se reusan en todas. NO inventar ningun valor que falte: preguntar antes de completarlo en un formulario real.",
+  "personales": {
+    "nombreCompleto": "",
+    "nombreDePila": "",
+    "apellido": "",
+    "email": "",
+    "telefono": "",
+    "telefonoSinPrefijo": "",
+    "ubicacion": "",
+    "linkedin": "",
+    "cv": "",
+    "direccion": {
+      "calle": "",
+      "numero": "",
+      "ciudad": "",
+      "provincia": "",
+      "codigoPostal": "",
+      "completa": ""
+    }
+  },
+  "screening": {
+    "pretensionNeta": null,
+    "pretensionBruta": null,
+    "moneda": "",
+    "periodo": "",
+    "comoResponder": "",
+    "disponibilidad": "",
+    "modalidades": [],
+    "tipoContratacion": "",
+    "relacionDependenciaActual": null,
+    "empleadorActual": "",
+    "motivoBusqueda": "",
+    "ingles": "",
+    "mayorDe18": null,
+    "elegibleParaTrabajarEnPais": null,
+    "disponibilidadViajar": "",
+    "requiereVisa": "",
+    "nacionalidad": "",
+    "comoNosConociste": ""
+  },
+  "experiencia": {
+    "actual": {
+      "titulo": "",
+      "empresa": "",
+      "ubicacion": "",
+      "desde": "",
+      "actual": true
+    },
+    "anterior": {}
+  },
+  "aniosPorTecnologia": {
+    "_comentario": "No usar lo que autocompletan los parsers de CV: suelen inventar anios que despues te dejan expuesto en una entrevista tecnica."
+  },
+  "rolCategoria": "",
+  "resumenCorto": "",
+  "puntosFuertes": []
+}

@@ -1,0 +1,74 @@
+{
+  "_comentario": "Plantilla vacia. El script lee este archivo en cada corrida, no hace falta tocar el .ps1. Completa candidato, habilidades y filtros con tu propio perfil.",
+
+  "candidato": {
+    "nombre": "",
+    "titulo": "",
+    "email": "",
+    "ubicacion": "",
+    "ingles": ""
+  },
+
+  "escalaMaxima": 70,
+  "puntajeMinimo": 35,
+  "diasMaximoAntiguedad": 45,
+  "enriquecerTopN": 40,
+  "topeCuerpo": 18,
+
+  "_comentarioRol": "El titulo manda. Si el titulo NO contiene un rol nucleo, la oferta recibe penalidadSinRol. Completa 'terminos' con los nombres de rol que buscas (ej: 'data analyst', 'backend developer', etc).",
+  "rolesNucleo": {
+    "_bonus": 15,
+    "_penalidadSinRol": -20,
+    "terminos": []
+  },
+
+  "_comentarioGeo": "Se evalua SOLO sobre el campo ubicacion. Si nombra un pais elegible -> bonus. Si nombra paises donde no podes trabajar y ninguno elegible -> penalidad fuerte. Si no dice nada -> neutro.",
+  "geo": {
+    "_bonus": 8,
+    "_penalidad": -60,
+    "_nota": "No pongas 'remote'/'remoto' como elegible: 'Remote - USA' seguiria sin servirte.",
+    "elegibles": [],
+    "noElegibles": []
+  },
+
+  "_comentarioHabilidades": "Cada clave es un termino a buscar en titulo/cuerpo, cada valor es el peso que suma si aparece.",
+  "habilidades": {},
+
+  "dominios": {
+    "_peso": 3,
+    "terminos": []
+  },
+
+  "_comentarioSeniority": "Ajusta segun el nivel al que apuntas: el nivel objetivo suma fuerte, el nivel actual queda neutro, los niveles fuera de alcance restan.",
+  "seniority": {},
+
+  "exclusiones": [
+    "internship", "pasant", "becari", "aprendiz"
+  ],
+
+  "busquedas": {
+    "linkedin": {
+      "activo": true,
+      "keywords": [],
+      "ubicaciones": [],
+      "paginas": 2,
+      "ultimosDias": 30
+    },
+    "computrabajo": {
+      "activo": true,
+      "slugs": [],
+      "paginas": 2
+    },
+    "remotive": {
+      "activo": true,
+      "keywords": []
+    },
+    "jobicy": {
+      "activo": true,
+      "tags": []
+    },
+    "himalayas": { "activo": true, "paginas": 3 },
+    "remoteok": { "activo": true },
+    "arbeitnow": { "activo": true }
+  }
+}
