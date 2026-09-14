@@ -1,12 +1,12 @@
 {
-  "_comentario": "Plantilla vacia. El script lee este archivo en cada corrida, no hace falta tocar el .ps1. Completa candidato, habilidades y filtros con tu propio perfil.",
+  "_comentario": "Perfil de Franco Bonorino. Objetivo: pivotar de Risk Assurance/IT Audit hacia AI Governance / IT Lead / Tech Manager.",
 
   "candidato": {
-    "nombre": "",
-    "titulo": "",
-    "email": "",
-    "ubicacion": "",
-    "ingles": ""
+    "nombre": "Franco Bonorino",
+    "titulo": "IT Governance & Risk Leader | AI Governance",
+    "email": "f.bonorino2001@gmail.com",
+    "ubicacion": "CABA, Argentina",
+    "ingles": "C2 (Cambridge CPE)"
   },
 
   "escalaMaxima": 70,
@@ -19,28 +19,72 @@
   "rolesNucleo": {
     "_bonus": 15,
     "_penalidadSinRol": -20,
-    "terminos": []
+    "terminos": [
+      "it governance", "ai governance", "it risk", "technology risk", "it audit",
+      "grc", "compliance manager", "risk manager", "it manager", "technology manager",
+      "sox manager", "gobierno de ti", "gerente de riesgos", "gerente de tecnologia",
+      "head of it", "it lead", "risk and compliance"
+    ]
   },
 
   "_comentarioGeo": "Se evalua SOLO sobre el campo ubicacion. Si nombra un pais elegible -> bonus. Si nombra paises donde no podes trabajar y ninguno elegible -> penalidad fuerte. Si no dice nada -> neutro.",
   "geo": {
     "_bonus": 8,
     "_penalidad": -60,
-    "_nota": "No pongas 'remote'/'remoto' como elegible: 'Remote - USA' seguiria sin servirte.",
-    "elegibles": [],
+    "_nota": "PENDIENTE DE CONFIRMAR: solo cargue Argentina porque es tu ubicacion conocida. Decime si sumamos LatAm/remoto global/paises especificos y actualizamos esto.",
+    "elegibles": ["Argentina", "Buenos Aires", "CABA"],
     "noElegibles": []
   },
 
   "_comentarioHabilidades": "Cada clave es un termino a buscar en titulo/cuerpo, cada valor es el peso que suma si aparece.",
-  "habilidades": {},
+  "habilidades": {
+    "IT Governance": 12,
+    "AI Governance": 12,
+    "SOX": 10,
+    "SOX Compliance": 10,
+    "ITGC": 8,
+    "SoD": 8,
+    "COSO": 6,
+    "ISO 27001": 6,
+    "ISO 27002": 6,
+    "Risk Management": 10,
+    "Compliance": 8,
+    "Team Leadership": 10,
+    "Stakeholder Management": 6,
+    "IT Audit": 9,
+    "Prompt Engineering": 6,
+    "Inteligencia Artificial": 8,
+    "AI": 6,
+    "Automatizacion": 6,
+    "Python": 5,
+    "SQL": 5,
+    "Power BI": 5,
+    "SAP": 5,
+    "Azure": 4,
+    "AWS": 4,
+    "GitHub": 3,
+    "JIRA": 3,
+    "n8n": 4
+  },
 
   "dominios": {
     "_peso": 3,
-    "terminos": []
+    "terminos": ["fintech", "banca", "seguros", "retail", "tecnologia", "naviera", "aeronautica", "agropecuaria", "real estate", "auditoria"]
   },
 
   "_comentarioSeniority": "Ajusta segun el nivel al que apuntas: el nivel objetivo suma fuerte, el nivel actual queda neutro, los niveles fuera de alcance restan.",
-  "seniority": {},
+  "seniority": {
+    "manager": 12,
+    "gerente": 12,
+    "lead": 10,
+    "head": 10,
+    "director": 8,
+    "senior": 2,
+    "junior": -15,
+    "trainee": -20,
+    "intern": -20,
+    "pasante": -20
+  },
 
   "exclusiones": [
     "internship", "pasant", "becari", "aprendiz"
@@ -49,23 +93,23 @@
   "busquedas": {
     "linkedin": {
       "activo": true,
-      "keywords": [],
-      "ubicaciones": [],
+      "keywords": ["IT Governance", "IT Risk Manager", "AI Governance", "GRC Manager", "Technology Risk", "IT Audit Manager"],
+      "ubicaciones": ["Argentina", "Buenos Aires"],
       "paginas": 2,
       "ultimosDias": 30
     },
     "computrabajo": {
       "activo": true,
-      "slugs": [],
+      "slugs": ["gobierno-de-ti", "gerente-de-riesgos-tecnologicos", "auditor-de-sistemas", "gerente-de-compliance"],
       "paginas": 2
     },
     "remotive": {
       "activo": true,
-      "keywords": []
+      "keywords": ["IT Governance", "IT Risk", "AI Governance", "Compliance Manager"]
     },
     "jobicy": {
       "activo": true,
-      "tags": []
+      "tags": ["management", "cyber-security"]
     },
     "himalayas": { "activo": true, "paginas": 3 },
     "remoteok": { "activo": true },

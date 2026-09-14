@@ -1,20 +1,20 @@
 {
-  "_comentario": "Plantilla vacia. Datos fijos para completar formularios de postulacion, se responden una vez y se reusan en todas. NO inventar ningun valor que falte: preguntar antes de completarlo en un formulario real.",
+  "_comentario": "Datos fijos para completar formularios de postulacion. Los campos en null/vacio NO se inventaron: falta que Franco los confirme antes de usarlos en un formulario real.",
   "personales": {
-    "nombreCompleto": "",
-    "nombreDePila": "",
-    "apellido": "",
-    "email": "",
-    "telefono": "",
-    "telefonoSinPrefijo": "",
-    "ubicacion": "",
+    "nombreCompleto": "Franco Bonorino",
+    "nombreDePila": "Franco",
+    "apellido": "Bonorino",
+    "email": "f.bonorino2001@gmail.com",
+    "telefono": "+54 9 11 3192 0620",
+    "telefonoSinPrefijo": "9 11 3192 0620",
+    "ubicacion": "CABA, Argentina",
     "linkedin": "",
-    "cv": "",
+    "cv": "radar-empleos/datos/FRANCO BONORINO - CV MARZO 2026.pdf",
     "direccion": {
       "calle": "",
       "numero": "",
-      "ciudad": "",
-      "provincia": "",
+      "ciudad": "CABA",
+      "provincia": "Ciudad Autonoma de Buenos Aires",
       "codigoPostal": "",
       "completa": ""
     }
@@ -28,10 +28,10 @@
     "disponibilidad": "",
     "modalidades": [],
     "tipoContratacion": "",
-    "relacionDependenciaActual": null,
-    "empleadorActual": "",
+    "relacionDependenciaActual": true,
+    "empleadorActual": "PwC Argentina",
     "motivoBusqueda": "",
-    "ingles": "",
+    "ingles": "C2 - Bilingue (Cambridge CPE)",
     "mayorDe18": null,
     "elegibleParaTrabajarEnPais": null,
     "disponibilidadViajar": "",
@@ -41,18 +41,30 @@
   },
   "experiencia": {
     "actual": {
-      "titulo": "",
-      "empresa": "",
-      "ubicacion": "",
-      "desde": "",
+      "titulo": "Senior Associate 2",
+      "empresa": "PwC Argentina",
+      "ubicacion": "CABA, Argentina",
+      "desde": "2024-12",
       "actual": true
     },
-    "anterior": {}
+    "anterior": {
+      "senior_associate": { "titulo": "Senior Associate", "empresa": "PwC Argentina", "desde": "2023-12", "hasta": "2024-12" },
+      "associate_2": { "titulo": "Associate 2", "empresa": "PwC Argentina", "desde": "2022-12", "hasta": "2023-12" },
+      "associate": { "titulo": "Associate", "empresa": "PwC Argentina", "desde": "2022-06", "hasta": "2022-12" }
+    }
   },
   "aniosPorTecnologia": {
-    "_comentario": "No usar lo que autocompletan los parsers de CV: suelen inventar anios que despues te dejan expuesto en una entrevista tecnica."
+    "_comentario": "No usar lo que autocompletan los parsers de CV: suelen inventar anios que despues te dejan expuesto en una entrevista tecnica. Pendiente: confirmar anios reales por tecnologia con Franco antes de usarlos en un formulario."
   },
-  "rolCategoria": "",
-  "resumenCorto": "",
-  "puntosFuertes": []
+  "rolCategoria": "AI Governance / IT Lead / Tech Manager",
+  "resumenCorto": "Lider de Tecnologia y Gobierno de Riesgos con 4+ anios dirigiendo equipos de hasta 6 profesionales en auditoria de controles de TI, gestion de accesos y automatizacion de procesos para clientes Fortune 500 y SEC-listed. Busca liderar iniciativas de gobierno tecnologico y de IA.",
+  "puntosFuertes": [
+    "Liderazgo de equipos de hasta 6 profesionales en proyectos de auditoria y consultoria",
+    "Gestion simultanea de 5 proyectos de auditoria SOX (clientes SEC-listed) y 2 proyectos de consultoria en paralelo",
+    "Gestion de stakeholders y ejecutivos C-level, con 95%+ de aceptacion de remediaciones",
+    "Diseno e implementacion de flujos de remediacion que redujeron riesgos de seguridad en 60%",
+    "Automatizacion de procesos e IA aplicada (Python, n8n, prompt engineering)",
+    "Experiencia con equipos y clientes internacionales (EEUU, Europa)",
+    "Ingles bilingue C2 (Cambridge CPE)"
+  ]
 }
