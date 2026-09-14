@@ -1,13 +1,22 @@
 # Radar de empleos
 
-Busca ofertas de **Data Analyst / BI Developer**, las puntúa contra tu CV y arma un reporte
-ordenado por match. PowerShell nativo: **no requiere instalar nada**.
+Busca ofertas de rol, las puntúa contra tu perfil y arma un reporte ordenado por match.
+Escrito en PowerShell — en Windows viene nativo; en Mac/Linux corre igual con PowerShell 7
+(`pwsh`), que desde 2016 es multiplataforma y no requiere reescribir nada.
 
 ## Uso
 
+**Windows** (PowerShell nativo):
 ```powershell
 cd "C:\Users\TuUsuario\Desktop\CV\radar-empleos"
 .\Buscar-Empleos.ps1
+```
+
+**Mac/Linux** (instalar PowerShell una vez, después corre igual):
+```bash
+brew install powershell      # una sola vez
+cd radar-empleos
+pwsh -File ./Buscar-Empleos.ps1
 ```
 
 Al terminar abre el reporte HTML en el navegador. Opciones:
@@ -20,9 +29,18 @@ Al terminar abre el reporte HTML en el navegador. Opciones:
 
 Para que corra solo todos los días:
 
+**Windows** (Programador de Tareas):
 ```powershell
 .\Programar-Tarea.ps1 -Hora "08:30"
 ```
+
+**Mac** (`launchd`, el equivalente nativo — `Programar-Tarea.ps1` no funciona acá):
+```bash
+./Programar-Tarea-Mac.sh -h 08:30
+./Programar-Tarea-Mac.sh -q      # para quitarla
+```
+Nota: a diferencia del Programador de Tareas de Windows, `launchd` no despierta la Mac si está
+dormida — corre solo si la Mac está prendida y con sesión iniciada a la hora programada.
 
 ## Qué mira
 
@@ -30,11 +48,17 @@ Para que corra solo todos los días:
 |---|---|---|
 | **LinkedIn** | Argentina | Endpoint público de invitado, sin login |
 | **Computrabajo** | Argentina | HTML de la búsqueda |
+| **Indeed** | Argentina | HTML de la búsqueda — **desactivado, confirmado 403 (anti-bot)** |
 | **Remotive / Jobicy / Himalayas / RemoteOK / Arbeitnow** | Remoto global | APIs públicas en JSON |
 
 **Bumeran y Zonajobs quedaron afuera**: son aplicaciones JavaScript que no traen ningún dato
 en el HTML, y su API interna no está en ninguna ruta pública conocida (probé varias, todas 404).
 No se pueden scrapear sin un navegador real. Para esas dos, usá la búsqueda asistida por Chrome.
+
+**Indeed quedó desactivado** (`perfil.json` → `busquedas.indeed.activo: false`): probado en vivo,
+devuelve 403 Forbidden en todas las peticiones por protección anti-bot, igual que Bumeran/Zonajobs.
+El código (`Get-Indeed`) queda en el script por si en el futuro aparece otra vía de acceso; mientras
+tanto, para esa fuente conviene usar la búsqueda asistida por Chrome.
 
 ## Cómo puntúa
 
@@ -64,11 +88,12 @@ Todo eso vive en `perfil.json` — **editá ese archivo, no el script**.
 
 ```
 radar-empleos/
-├─ Buscar-Empleos.ps1     el script
-├─ Programar-Tarea.ps1    registra/quita la tarea diaria
-├─ perfil.json            tu perfil y todos los pesos  <- editá esto
-├─ datos/vistos.json      qué ofertas ya viste (para marcar las NUEVAS)
-└─ reportes/              un HTML + un CSV por corrida
+├─ Buscar-Empleos.ps1        el script
+├─ Programar-Tarea.ps1       registra/quita la tarea diaria (Windows)
+├─ Programar-Tarea-Mac.sh    registra/quita la tarea diaria (Mac, launchd)
+├─ perfil.json               tu perfil y todos los pesos  <- editá esto
+├─ datos/vistos.json         qué ofertas ya viste (para marcar las NUEVAS)
+└─ reportes/                 un HTML + un CSV por corrida
 ```
 
 Si borrás `datos/vistos.json`, la próxima corrida marca todo como nuevo.

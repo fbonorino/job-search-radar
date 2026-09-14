@@ -4,7 +4,7 @@
     las puntua contra el perfil del CV y genera un reporte HTML + CSV.
 
 .DESCRIPTION
-    Fuentes: LinkedIn (endpoint publico de invitado), Computrabajo Argentina,
+    Fuentes: LinkedIn (endpoint publico de invitado), Computrabajo Argentina, Indeed,
     Remotive, Jobicy, Himalayas, RemoteOK y Arbeitnow.
     No requiere instalar nada: PowerShell 5.1 nativo de Windows.
 
@@ -271,6 +271,45 @@ function Get-RemoteOK($cfg) {
     return $out
 }
 
+function Get-Indeed($cfg) {
+    # OJO: Indeed usa proteccion anti-bot agresiva (similar a lo que ya nos paso con
+    # Bumeran/Zonajobs, ver README). Este scraper hace peticiones HTML simples, sin
+    # navegador real: es esperable que en muchos entornos devuelva 0 resultados o un
+    # error 403/CAPTCHA en vez de la pagina de resultados. Probar antes de confiar en el.
+    $out = @()
+    if (-not $cfg.activo) { return $out }
+    $dominio = if ($cfg.dominio) { $cfg.dominio } else { 'ar.indeed.com' }
+    foreach ($kw in $cfg.keywords) {
+        foreach ($loc in $cfg.ubicaciones) {
+            for ($p = 0; $p -lt $cfg.paginas; $p++) {
+                $start = $p * 10
+                $url = "https://$dominio/jobs?q=" + [uri]::EscapeDataString($kw) +
+                       '&l=' + [uri]::EscapeDataString($loc) + "&start=$start"
+                try {
+                    $html = Get-Web $url
+                } catch {
+                    Log "    Indeed '$kw' p$p -> $($_.Exception.Message)" 'warn'; continue
+                }
+                $bloques = [regex]::Matches($html, '(?s)<div class="job_seen_beacon".*?</div>\s*</table>')
+                if ($bloques.Count -eq 0) { break }
+                foreach ($b in $bloques) {
+                    $t = $b.Value
+                    $mId  = [regex]::Match($t, 'data-jk="([^"]+)"')
+                    $mTit = [regex]::Match($t, '(?s)<h2 class="jobTitle[^"]*">.*?<span[^>]*>\s*(.*?)\s*</span>')
+                    $mEmp = [regex]::Match($t, '(?s)<span class="companyName">\s*(.*?)\s*</span>')
+                    $mLoc = [regex]::Match($t, '(?s)<div class="companyLocation">\s*(.*?)\s*</div>')
+                    if (-not $mTit.Success -or -not $mId.Success) { continue }
+                    $href = "https://$dominio/viewjob?jk=$($mId.Groups[1].Value)"
+                    $out += New-Oferta 'Indeed' $mId.Groups[1].Value $mTit.Groups[1].Value $mEmp.Groups[1].Value `
+                                       $mLoc.Groups[1].Value $href '' $null ''
+                }
+                Start-Sleep -Milliseconds 900
+            }
+        }
+    }
+    return $out
+}
+
 function Get-Arbeitnow($cfg) {
     $out = @()
     if (-not $cfg.activo) { return $out }
@@ -321,7 +360,17 @@ function Score-Oferta($o, $perfil) {
     $motivos = New-Object System.Collections.ArrayList
     $alertas = New-Object System.Collections.ArrayList
 
-    # 1. exclusiones duras por titulo
+    # 1. exclusiones duras por empresa (ej: tu propio empleador actual)
+    $emp = Norm $o.Empresa
+    foreach ($ex in $perfil.empresasExcluidas) {
+        if ($emp -and $emp.Contains((Norm $ex))) {
+            $o.Puntaje = 0
+            $o.Alertas = @("Excluido por empresa: '$ex'")
+            return
+        }
+    }
+
+    # 1b. exclusiones duras por titulo
     foreach ($ex in $perfil.exclusiones) {
         if ($tit.Contains((Norm $ex))) {
             $o.Puntaje = 0
@@ -400,6 +449,37 @@ function Score-Oferta($o, $perfil) {
     $o.Alertas = $alertas.ToArray()
 }
 
+# --------------------------------------------------------- cola de postulacion
+
+function Read-ColaEstados([string]$Path) {
+    $estados = @{}
+    if (-not (Test-Path $Path)) { return $estados }
+    $txt = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    foreach ($line in ($txt -split "`n")) {
+        $m = [regex]::Match($line, '^\|\s*\d+\s*\|\s*\[.*?\]\((.*?)\)\s*\|.*?\|.*?\|\s*(PENDIENTE|ENVIADA|DESCARTADA)\s*\|')
+        if ($m.Success) { $estados[$m.Groups[1].Value] = $m.Groups[2].Value }
+    }
+    return $estados
+}
+
+function Write-Cola($Ofertas, [string]$Path) {
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine('# Cola de postulación')
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('Generado por `Buscar-Empleos.ps1`. Ofertas por encima del `puntajeMinimo` de `perfil.json`.')
+    [void]$sb.AppendLine('Actualizá el `Estado` a mano (o pedile a Claude que lo actualice) a medida que postulás:')
+    [void]$sb.AppendLine('`PENDIENTE` -> `ENVIADA` o `DESCARTADA`. La proxima corrida respeta lo que ya marcaste.')
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('| Puntaje | Título | Empresa | Fuente | Estado |')
+    [void]$sb.AppendLine('|---|---|---|---|---|')
+    foreach ($o in $Ofertas) {
+        $tit = ($o.Titulo -replace '\|', '/')
+        $emp = ($o.Empresa -replace '\|', '/')
+        [void]$sb.AppendLine("| $($o.Puntaje) | [$tit]($($o.Url)) | $emp | $($o.Fuente) | $($o.Estado) |")
+    }
+    Write-Utf8 $Path $sb.ToString()
+}
+
 # ------------------------------------------------------------------- reporte
 
 function Build-Html($ofertas, $perfil, $stats) {
@@ -420,6 +500,7 @@ h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
 .bar button{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer}
 .bar button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .job{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:10px;display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:start}
+.job[hidden]{display:none!important}
 .sc{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:17px;color:#fff;background:var(--mut)}
 .s90{background:#2f7a52}.s70{background:#5b8f3c}.s50{background:#b0862c}.s30{background:#9a6a4a}
 .t{font-size:16px;font-weight:650;margin:0 0 3px;letter-spacing:-.01em}
@@ -431,6 +512,10 @@ h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
 .chip.src{border-color:var(--acc);color:var(--acc)}
 .chip.new{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
 .chip.al{border-color:var(--warn);color:var(--warn)}
+.chip.enviada{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+.chip.descartada{border-color:var(--mut);color:var(--mut);text-decoration:line-through}
+.chip.pendiente{border-color:var(--line);color:var(--mut)}
+.chip.revisar{background:var(--warn);border-color:var(--warn);color:#fff;font-weight:600}
 .why{color:var(--mut);font-size:12px;margin-top:8px}
 footer{color:var(--mut);font-size:12px;margin-top:32px;border-top:1px solid var(--line);padding-top:14px}
 @media(max-width:640px){.job{grid-template-columns:44px 1fr;gap:12px}.sc{width:44px;height:44px;font-size:14px}}
@@ -465,6 +550,7 @@ document.querySelectorAll('.bar button').forEach(function(b){
     [void]$sb.Append('<div class="stat"><b>' + $ofertas.Count + '</b><span>Con match</span></div>')
     [void]$sb.Append('<div class="stat"><b>' + (@($ofertas | Where-Object { $_.Nuevo }).Count) + '</b><span>Nuevas</span></div>')
     [void]$sb.Append('<div class="stat"><b>' + (@($ofertas | Where-Object { $_.Puntaje -ge 70 }).Count) + '</b><span>Match alto</span></div>')
+    [void]$sb.Append('<div class="stat"><b>' + (@($ofertas | Where-Object { $_.PSObject.Properties.Name -contains 'Estado' -and $_.Estado -eq 'REVISAR' }).Count) + '</b><span>A revisar</span></div>')
     [void]$sb.Append('<div class="stat"><b>' + $stats.Recolectadas + '</b><span>Analizadas</span></div>')
     [void]$sb.Append('</div>')
 
@@ -481,8 +567,13 @@ document.querySelectorAll('.bar button').forEach(function(b){
         $nv = '0'; if ($o.Nuevo) { $nv = '1' }
         [void]$sb.Append('<div class="job" data-src="' + $o.Fuente + '" data-new="' + $nv + '">')
         [void]$sb.Append('<div class="sc ' + $cls + '">' + $o.Puntaje + '</div><div>')
+        $estado = 'PENDIENTE'
+        if ($o.PSObject.Properties.Name -contains 'Estado' -and $o.Estado) { $estado = $o.Estado }
+        $estadoCls = 'pendiente'
+        if ($estado -eq 'ENVIADA') { $estadoCls = 'enviada' } elseif ($estado -eq 'DESCARTADA') { $estadoCls = 'descartada' } elseif ($estado -eq 'REVISAR') { $estadoCls = 'revisar' }
         [void]$sb.Append('<p class="t"><a href="' + [System.Net.WebUtility]::HtmlEncode($o.Url) + '" target="_blank" rel="noopener">' +
-                         [System.Net.WebUtility]::HtmlEncode($o.Titulo) + '</a></p>')
+                         [System.Net.WebUtility]::HtmlEncode($o.Titulo) + '</a> <span class="chip ' + $estadoCls + '">' +
+                         $estado + '</span></p>')
         $emp = $o.Empresa; if (-not $emp) { $emp = 'Empresa no informada' }
         $partes = @('<b>' + [System.Net.WebUtility]::HtmlEncode($emp) + '</b>')
         if ($o.Ubicacion) { $partes += [System.Net.WebUtility]::HtmlEncode($o.Ubicacion) }
@@ -497,7 +588,8 @@ document.querySelectorAll('.bar button').forEach(function(b){
         [void]$sb.Append('</div>')
 
         if ($o.Motivos.Count -gt 0) {
-            [void]$sb.Append('<p class="why">Coincide en: ' + [System.Net.WebUtility]::HtmlEncode(($o.Motivos -join ' &middot; ')) + '</p>')
+            $motivosEnc = $o.Motivos | ForEach-Object { [System.Net.WebUtility]::HtmlEncode($_) }
+            [void]$sb.Append('<p class="why">Coincide en: ' + ($motivosEnc -join ' &middot; ') + '</p>')
         }
         [void]$sb.Append('</div></div>')
     }
@@ -524,6 +616,7 @@ $fuentes = @()
 $plan = @(
     @{ N = 'LinkedIn';     F = ${function:Get-LinkedIn};     C = $perfil.busquedas.linkedin }
     @{ N = 'Computrabajo'; F = ${function:Get-Computrabajo}; C = $perfil.busquedas.computrabajo }
+    @{ N = 'Indeed';       F = ${function:Get-Indeed};       C = $perfil.busquedas.indeed }
     @{ N = 'Remotive';     F = ${function:Get-Remotive};     C = $perfil.busquedas.remotive }
     @{ N = 'Jobicy';       F = ${function:Get-Jobicy};       C = $perfil.busquedas.jobicy }
     @{ N = 'Himalayas';    F = ${function:Get-Himalayas};    C = $perfil.busquedas.himalayas }
@@ -546,11 +639,12 @@ foreach ($s in $plan) {
 }
 
 $recolectadas = $todas.Count
+$stamp = Get-Date -Format 'yyyy-MM-dd_HHmm'
 Log ''
 Log "  Recolectadas: $recolectadas"
 
 # deduplicar por titulo+empresa normalizados, quedandonos con la fuente mas util
-$prioridad = @{ 'LinkedIn' = 1; 'Computrabajo' = 2; 'Remotive' = 3; 'Himalayas' = 4; 'Jobicy' = 5; 'RemoteOK' = 6; 'Arbeitnow' = 7 }
+$prioridad = @{ 'LinkedIn' = 1; 'Computrabajo' = 2; 'Indeed' = 3; 'Remotive' = 4; 'Himalayas' = 5; 'Jobicy' = 6; 'RemoteOK' = 7; 'Arbeitnow' = 8 }
 $vistoClave = @{}
 $unicas = @()
 foreach ($o in ($todas | Sort-Object @{E = { $prioridad[$_.Fuente] }})) {
@@ -606,10 +700,58 @@ foreach ($o in $final) {
 Log "  Nuevas desde la ultima corrida: $(@($final | Where-Object { $_.Nuevo }).Count)" 'ok'
 Write-Utf8 $archivoVistos (($vistos | ConvertTo-Json -Depth 3))
 
+# estado de postulacion: por debajo de puntajeAutoEnvio queda REVISAR (no se postula),
+# salvo que ya lo hayas marcado ENVIADA/DESCARTADA a mano en una corrida anterior.
+$umbralAuto = 70
+if ($perfil.puntajeAutoEnvio) { $umbralAuto = [int]$perfil.puntajeAutoEnvio }
+$rutaCola = Join-Path $Raiz 'cola-postulacion.md'
+$estadosPrevios = Read-ColaEstados $rutaCola
+foreach ($o in $final) {
+    $estado = if ($o.Puntaje -lt $umbralAuto) { 'REVISAR' } else { 'PENDIENTE' }
+    if ($estadosPrevios.ContainsKey($o.Url)) { $estado = $estadosPrevios[$o.Url] }
+    $o | Add-Member -NotePropertyName Estado -NotePropertyValue $estado -Force
+}
+Write-Cola $final $rutaCola
+Log "  Cola de postulacion: $rutaCola" 'ok'
+$countRevisar = @($final | Where-Object { $_.Estado -eq 'REVISAR' }).Count
+Log "  A revisar (match < $umbralAuto, no se postulan solas): $countRevisar" 'warn'
+
+# reporte de brechas: que terminos aparecen seguido en las ofertas REVISAR y no estan en tu perfil
+$rutaBrechas = $null
+if ($countRevisar -gt 0 -and $perfil.vocabularioBrechas -and $perfil.vocabularioBrechas.Count -gt 0) {
+    $conteo = @{}
+    $ejemplos = @{}
+    foreach ($o in ($final | Where-Object { $_.Estado -eq 'REVISAR' })) {
+        $texto = Norm ("$($o.Titulo) $($o.Descripcion)")
+        foreach ($termino in $perfil.vocabularioBrechas) {
+            if ($texto.Contains((Norm $termino))) {
+                if (-not $conteo.ContainsKey($termino)) { $conteo[$termino] = 0; $ejemplos[$termino] = @() }
+                $conteo[$termino]++
+                if ($ejemplos[$termino].Count -lt 3) { $ejemplos[$termino] += $o.Titulo }
+            }
+        }
+    }
+    if ($conteo.Count -gt 0) {
+        $rutaBrechas = Join-Path $DirReportes "brechas_$stamp.md"
+        $sbB = New-Object System.Text.StringBuilder
+        [void]$sbB.AppendLine('# Brechas de skills detectadas')
+        [void]$sbB.AppendLine('')
+        [void]$sbB.AppendLine("Terminos que aparecen en ofertas de match medio-bajo (REVISAR, puntaje < $umbralAuto) y que NO estan en tu perfil (`habilidades` de `perfil.json`).")
+        [void]$sbB.AppendLine('Si algo se repite mucho, es candidato a sumarse al CV/perfil (si lo tenes) o a formacion (si no).')
+        [void]$sbB.AppendLine('')
+        [void]$sbB.AppendLine('| Termino | Ofertas que lo mencionan | Ejemplos |')
+        [void]$sbB.AppendLine('|---|---|---|')
+        foreach ($k in ($conteo.Keys | Sort-Object { $conteo[$_] } -Descending)) {
+            [void]$sbB.AppendLine("| $k | $($conteo[$k]) | $(($ejemplos[$k] -join '; ')) |")
+        }
+        Write-Utf8 $rutaBrechas $sbB.ToString()
+        Log "  Reporte de brechas: $rutaBrechas" 'warn'
+    }
+}
+
 # salidas
-$stamp   = Get-Date -Format 'yyyy-MM-dd_HHmm'
 $rutaCsv = Join-Path $DirReportes "ofertas_$stamp.csv"
-$final | Select-Object Puntaje, Nuevo, Fuente, Titulo, Empresa, Ubicacion, Modalidad,
+$final | Select-Object Puntaje, Estado, Nuevo, Fuente, Titulo, Empresa, Ubicacion, Modalidad,
     @{N='Fecha';E={ if ($_.Fecha) { $_.Fecha.ToString('yyyy-MM-dd') } else { '' } }},
     @{N='Motivos';E={ $_.Motivos -join '; ' }},
     @{N='Alertas';E={ $_.Alertas -join '; ' }}, Url |

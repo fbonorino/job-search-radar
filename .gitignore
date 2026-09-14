@@ -1,7 +1,12 @@
 # Datos personales / generados en cada corrida — nunca al repo
 CV_*.pdf
+radar-empleos/datos/*.pdf
+radar-empleos/datos/*.docx
+radar-empleos/datos/~$*
 radar-empleos/reportes/*.html
 radar-empleos/reportes/*.csv
+radar-empleos/reportes/*.md
+radar-empleos/reportes/launchd.*.log
 radar-empleos/datos/vistos.json
 radar-empleos/navegador-perfil/
 radar-empleos/cola-postulacion.md

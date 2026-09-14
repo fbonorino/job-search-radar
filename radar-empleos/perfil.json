@@ -11,6 +11,8 @@
 
   "escalaMaxima": 70,
   "puntajeMinimo": 35,
+  "_comentarioAutoEnvio": "Ofertas con puntaje >= puntajeAutoEnvio quedan PENDIENTE (candidatas a postulacion, asistida o automatica el dia que exista). Por debajo de este umbral (pero por encima de puntajeMinimo) quedan en estado REVISAR: no se postulan, y se juntan en el reporte de brechas para ver que le falta al CV.",
+  "puntajeAutoEnvio": 70,
   "diasMaximoAntiguedad": 45,
   "enriquecerTopN": 40,
   "topeCuerpo": 18,
@@ -67,6 +69,15 @@
     "n8n": 4
   },
 
+  "_comentarioBrechas": "Terminos a vigilar en las ofertas REVISAR (match medio-bajo) que NO estan en 'habilidades'. Si aparecen seguido, es una senal de que faltan en el CV/perfil.",
+  "vocabularioBrechas": [
+    "CISA", "CRISC", "CISM", "CISSP", "ISACA", "NIST", "GDPR", "PCI DSS",
+    "Terraform", "Kubernetes", "Docker", "Snowflake", "Databricks",
+    "GenAI", "LLM", "Copilot", "Six Sigma", "PMP", "Agile", "Scrum",
+    "DevSecOps", "Zero Trust", "SOC 2", "HIPAA", "ITIL", "Data Governance",
+    "Vendor Risk", "Third Party Risk", "Business Continuity", "Disaster Recovery"
+  ],
+
   "dominios": {
     "_peso": 3,
     "terminos": ["fintech", "banca", "seguros", "retail", "tecnologia", "naviera", "aeronautica", "agropecuaria", "real estate", "auditoria"]
@@ -90,6 +101,11 @@
     "internship", "pasant", "becari", "aprendiz"
   ],
 
+  "_comentarioEmpresasExcluidas": "Ofertas de estas empresas se descartan (puntaje 0), sin importar el titulo. Util para no matchear con tu propio empleador.",
+  "empresasExcluidas": [
+    "PwC", "PwC Argentina", "PricewaterhouseCoopers"
+  ],
+
   "busquedas": {
     "linkedin": {
       "activo": true,
@@ -101,6 +117,14 @@
     "computrabajo": {
       "activo": true,
       "slugs": ["gobierno-de-ti", "gerente-de-riesgos-tecnologicos", "auditor-de-sistemas", "gerente-de-compliance"],
+      "paginas": 2
+    },
+    "indeed": {
+      "_nota": "Confirmado 2026-09-13: Indeed devuelve 403 Forbidden en todas las peticiones (anti-bot). Desactivado. Reactivar (\"activo\": true) solo si encontras una forma de esquivarlo.",
+      "activo": false,
+      "dominio": "ar.indeed.com",
+      "keywords": ["IT Governance", "IT Risk Manager", "AI Governance", "GRC Manager"],
+      "ubicaciones": ["Argentina", "Buenos Aires"],
       "paginas": 2
     },
     "remotive": {
